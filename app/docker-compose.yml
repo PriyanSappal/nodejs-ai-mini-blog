@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=${PORT}
+      - MONGO_URI=${MONGO_URI}
+      - OPENAI_API_KEY=${OPENAI_API_KEY} # optional
+      - APP_URL=${APP_URL}
+    depends_on:
+      - mongo
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - app_net
+
+  mongo:
+    image: mongo:6
+    container_name: mongo-db-new
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: devops_blog
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - app_net
+
+volumes:
+  mongo_data:
+
+networks:
+  app_net:
+    driver: bridge

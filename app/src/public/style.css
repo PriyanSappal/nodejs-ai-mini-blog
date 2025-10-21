@@ -1,0 +1,7 @@
+body{font-family:Inter,system-ui,Arial;margin:0;background:#f7f8fb;color:#111}
+.container{max-width:900px;margin:32px auto;padding:16px}
+header h1{margin:0}
+.muted{color:#6b7280}
+.card{background:#fff;padding:16px;border-radius:8px;box-shadow:0 2px 8px rgba(17,24,39,0.04);margin-bottom:16px}
+.btn{display:inline-block;padding:8px 12px;background:#111;color:#fff;border-radius:6px;text-decoration:none}
+input,textarea{display:block;width:100%;padding:8px;margin:8px 0}

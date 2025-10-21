@@ -1,0 +1,71 @@
+
+<section class="card">
+  <h2>Posts</h2>
+  <ul id="posts-list">
+    <% posts.forEach(p => { %>
+    <li>
+      <h4><%= p.title %></h4>
+      <p><em>by <%= p.author %> — <%= new Date(p.createdAt).toLocaleString() %></em></p>
+      <p><%= p.content %></p>
+    </li>
+    <% }) %>
+  </ul>
+<a href="/">Back</a>
+</section>
+
+<section class="card">
+  <h3>Add post</h3>
+  <form id="post-form" action="/api/posts" method="POST">
+    <input name="title" placeholder="Title" required />
+    <input name="author" placeholder="Author" />
+    <textarea name="content" placeholder="Content" required></textarea>
+    <button type="submit">Submit</button>
+  </form>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+const form = document.getElementById('post-form');
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const body = {
+    title: form.title.value,
+    author: form.author.value || 'Priyan', // default author
+    content: form.content.value
+  };
+
+  try {
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (res.status === 201) {
+      const post = await res.json();
+      console.log('Post saved:', post);
+
+      // Add post to the page dynamically
+      const ul = document.getElementById('posts-list');
+      const li = document.createElement('li');
+      li.innerHTML = `
+        <h4>${post.title}</h4>
+        <p><em>by ${post.author} — ${new Date(post.createdAt).toLocaleString()}</em></p>
+        <p>${post.content}</p>
+      `;
+      ul.prepend(li);
+
+      form.reset();
+    } else {
+      const err = await res.json();
+      alert('Error: ' + (err.error || 'Unknown'));
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Request failed');
+  }
+  });
+});
+</script>

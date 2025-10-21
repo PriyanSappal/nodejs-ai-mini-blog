@@ -1,0 +1,78 @@
+
+<section class="card">
+  <h2>Welcome ✨</h2>
+  <p>Live Stats:</p>
+  <ul>
+    <li>Total posts: <strong><%= postsCount %></strong></li>
+    <li>Total visits: <strong><%= visits %></strong></li>
+    <li>Server uptime (s): <strong><%= Math.floor(uptime) %></strong></li>
+  </ul>
+  <p>
+    <a class="btn" href="/posts">View Posts</a>
+  </p>
+</section>
+
+<section class="card">
+  <h3>AI Assistant</h3>
+  <p>Ask the assistant for a blog idea (uses OpenAI if configured)</p>
+  <form id="ai-form">
+    <input id="prompt" name="prompt" placeholder="Type your request..." />
+    <button type="submit">Get Idea</button>
+  </form>
+  <div id="ai-result" class="ai-output placeholder">
+    Your AI idea will appear here...
+  </div>
+</section>
+
+<script src="/js/marked.min.js"></script>
+<script src="/js/ai-handler.js"></script>
+<script>
+
+// record visit
+fetch('/api/visit', { method: 'POST' }).catch(()=>{});
+</script>
+
+<style>
+.ai-output {
+  margin-top: 1em;
+  padding: 1em;
+  border-radius: 0.75rem;
+  background: #f9fafb;
+  border: 1px solid #ddd;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  white-space: normal;
+  overflow-x: auto;
+}
+.ai-output h2, .ai-output h3 {
+  color: #222;
+  margin-top: 0.5em;
+}
+.error {
+  color: #b00;
+  font-weight: bold;
+}
+.placeholder {
+  color: #777;
+  font-style: italic;
+}
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.5em 1em;
+  border-radius: 0.5em;
+  cursor: pointer;
+}
+button:hover {
+  background: #0056b3;
+}
+input {
+  padding: 0.5em;
+  width: 70%;
+  border: 1px solid #ccc;
+  border-radius: 0.4em;
+  margin-right: 0.5em;
+}
+</style>
+
