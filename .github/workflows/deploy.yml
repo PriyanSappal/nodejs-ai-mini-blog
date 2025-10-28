@@ -44,14 +44,18 @@ jobs:
       with:
         terraform_version: 1.6.0  # or whatever version you want
 
+    - name: Verify working directory
+      run: pwd && ls -la ./terraform/docker-compose-ec2
+
+    - name: Check Terraform version
+      run: terraform version
 
     # ---------- Terraform Init & Apply ----------
     - name: Terraform Init
-      working-directory: ${{ env.TERRAFORM_DIR }}
-      run: terraform init
+      run: terraform -chdir=./terraform/docker-compose-ec2 init
 
     - name: Terraform Apply
-      run: terraform apply -auto-approve
+      run: terraform -chdir=./terraform/docker-compose-ec2 apply -auto-approve
       env:
         TF_VAR_region: eu-west-2
         TF_VAR_open_api_key: ${{ secrets.OPENAI_API_KEY }}
