@@ -24,6 +24,7 @@ infra/terraform/.terraform.
 # Does not contain sensitive info
 # Does not need to be ignored  
 .terraform.lock.hcl
+.terraform.tfstate.lock.info
 
 # Does not contain sensitive file, just avoid blot in your remote repos
 .terraform/

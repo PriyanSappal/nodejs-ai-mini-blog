@@ -67,7 +67,6 @@ resource "aws_instance" "devops_blog" {
     OPENAI_API_KEY = var.openai_api_key
     MONGO_URI      = var.mongo_uri
     PORT           = var.PORT
-    APP_URL        = output.app_url
   })
 
   tags = {
