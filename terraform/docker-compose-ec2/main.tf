@@ -66,7 +66,7 @@ resource "aws_instance" "devops_blog" {
   subnet_id                   = element(data.aws_subnets.default.ids, 0)
   vpc_security_group_ids      = [aws_security_group.devops_blog_sg.id]
   key_name                    = aws_key_pair.devops_key.key_name
-  user_data = templatefile("/user-data.sh", {
+  user_data = templatefile("${path.module}/user-data.sh", {
     OPENAI_API_KEY = var.openai_api_key
     MONGO_URI      = var.mongo_uri
     PORT           = var.PORT
