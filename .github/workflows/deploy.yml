@@ -65,11 +65,10 @@ jobs:
 
 
     # ---------- Get EC2 Public IP ----------
-    - name: Get EC2 Public IP
-      id: get_ec2_ip
-      working-directory: ${{ env.TERRAFORM_DIR }}
+    - name: Get EC2 public IP
+      id: get-ec2-ip
       run: |
-        EC2_IP=$(terraform output -raw public_ip)
+        EC2_IP=$(terraform -chdir=./terraform/docker-compose-ec2 output -raw public_ip 2>/dev/null | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n1)
         echo "ec2_ip=$EC2_IP" >> $GITHUB_OUTPUT
 
     # ---------- Deploy to EC2 ----------
