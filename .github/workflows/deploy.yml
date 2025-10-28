@@ -35,6 +35,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
+    - name: List Terraform folder
+      run: ls -la ./terraform/docker-compose-ec2
+
     # ---------- Configure Terraform ----------
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v2
