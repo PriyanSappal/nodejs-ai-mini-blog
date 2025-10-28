@@ -5,7 +5,9 @@ provider "aws" {
 
 resource "aws_key_pair" "devops_key" {
   key_name   = "devops-key"
-  public_key = file("~/.ssh/devops-key.pub")
+  # public_key = file("~/.ssh/devops-key.pub")
+  # uncomment the above line to use tf locally without CI/CD and comment the variable line below
+  public_key = var.devops_public_key
 }
 
 resource "aws_security_group" "devops_blog_sg" {
