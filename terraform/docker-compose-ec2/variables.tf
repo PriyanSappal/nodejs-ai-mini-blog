@@ -10,10 +10,6 @@ variable "PORT" {
   default = "3000"
 }
 
-variable "key_name" {
-  description = "EC2 key pair for SSH access"
-}
-
 variable "openai_api_key" {
   description = "OpenAI API key"
   sensitive   = true
