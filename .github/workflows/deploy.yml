@@ -9,7 +9,7 @@ env:
   AWS_REGION: eu-west-2
   EC2_USER: ubuntu
   APP_DIR: /opt/devops-blog
-  TERRAFORM_DIR: ./terraform
+  TERRAFORM_DIR: ./terraform/docker-compose-ec2
 
 jobs:
   deploy:
