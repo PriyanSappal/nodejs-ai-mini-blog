@@ -1,0 +1,76 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  AWS_REGION: eu-west-2
+  EC2_USER: ubuntu
+  APP_DIR: /opt/devops-blog
+  TERRAFORM_DIR: ./terraform
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    # ---------- Checkout code ----------
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    # ---------- Set up SSH key ----------
+    - name: Set up SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/devops-key
+        chmod 600 ~/.ssh/devops-key
+
+    # ---------- Configure AWS ----------
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    # ---------- Terraform Init & Apply ----------
+    - name: Terraform Init
+      working-directory: ${{ env.TERRAFORM_DIR }}
+      run: terraform init
+
+    - name: Terraform Apply
+      working-directory: ${{ env.TERRAFORM_DIR }}
+      run: terraform apply -auto-approve
+
+    # ---------- Get EC2 Public IP ----------
+    - name: Get EC2 Public IP
+      id: get_ec2_ip
+      working-directory: ${{ env.TERRAFORM_DIR }}
+      run: |
+        EC2_IP=$(terraform output -raw public_ip)
+        echo "ec2_ip=$EC2_IP" >> $GITHUB_OUTPUT
+
+    # ---------- Deploy to EC2 ----------
+    - name: Deploy app to EC2
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        MONGO_URI: ${{ secrets.MONGO_URI }}
+        PORT: 3000
+      run: |
+        echo "Deploying to ${{ steps.get_ec2_ip.outputs.ec2_ip }}"
+
+        # Copy repo to EC2
+        scp -o StrictHostKeyChecking=no -r . ${{ env.EC2_USER }}@${{ steps.get_ec2_ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
+
+        # SSH into EC2 and run Docker Compose
+        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get_ec2_ip.outputs.ec2_ip }} << 'EOF'
+          cd $APP_DIR
+          cat <<EOV > .env
+          PORT=${PORT}
+          MONGO_URI=${MONGO_URI}
+          OPENAI_API_KEY=${OPENAI_API_KEY}
+        EOV
+          docker compose up -d --build
+        EOF

@@ -1,5 +1,6 @@
 provider "aws" {
   region = var.region
+  profile = "ci-cd-deployer"
 }
 
 resource "aws_key_pair" "devops_key" {

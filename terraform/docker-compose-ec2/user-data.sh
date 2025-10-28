@@ -4,13 +4,6 @@ set -e
 PUBLIC_IP=$(curl -s http://169.254.169.254/latest/meta-data/public-ipv4)
 APP_URL="http://$${PUBLIC_IP}:3000"
 
-cat <<EOF > .env
-PORT=${PORT}
-MONGO_URI=${MONGO_URI}
-OPENAI_API_KEY=${OPENAI_API_KEY}
-APP_URL=$${APP_URL}
-EOF
-
 echo "export APP_URL='$${APP_URL}'" >> /etc/environment
 
 # -------- UPDATE SYSTEM --------
@@ -37,19 +30,20 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # -------- POST-INSTALL: ADD USER TO DOCKER GROUP --------
-echo_info "Adding $USER_NAME to docker group..."
-sudo usermod -aG docker $USER_NAME
+DEFAULT_USER=$(getent passwd 1000 | cut -d: -f1)
+echo "Adding $${DEFAULT_USER} to docker group..."
+usermod -aG docker "$${DEFAULT_USER}"
 
 # -------- CHECK INSTALLATION --------
-echo_info "Checking Docker and Docker Compose versions..."
+echo "Checking Docker and Docker Compose versions..."
 docker --version
 docker compose version
 
 # Create app directory
-mkdir -p /opt/devops-blog
+sudo mkdir -p /opt/devops-blog
 cd /opt/devops-blog
 
-git clone https://github.com/PriyanSappal/nodejs-ai-mini-blog.git .
+sudo git clone https://github.com/PriyanSappal/nodejs-ai-mini-blog.git .
 cd app/
 
 # # Copy the docker-compose file from Terraform
@@ -94,4 +88,12 @@ cd app/
 # EOF
 
 # Run the stack
-sudo docker compose up -d
+
+sudo cat <<EOF > .env
+PORT=${PORT}
+MONGO_URI=${MONGO_URI}
+OPENAI_API_KEY=${OPENAI_API_KEY}
+APP_URL=$${APP_URL}
+EOF
+
+sudo docker compose up --build -d
