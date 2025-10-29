@@ -43,15 +43,19 @@ docker compose version
 sudo mkdir -p /opt/devops-blog
 cd /opt/devops-blog
 
-sudo git clone https://github.com/PriyanSappal/nodejs-ai-mini-blog.git .
-cd app/
+echo "Docker Setup Completed"
 
-sudo cat <<EOF > .env
-PORT=${PORT}
-MONGO_URI=${MONGO_URI}
-OPENAI_API_KEY=${OPENAI_API_KEY}
-APP_URL=$${APP_URL}
-EOF
+# Uncomment below if you are using Terraform locally
 
-sudo docker compose up --build -d
-sudo docker compose up -d
+# sudo git clone https://github.com/PriyanSappal/nodejs-ai-mini-blog.git .
+# cd app/
+
+# sudo cat <<EOF > .env
+# PORT=${PORT}
+# MONGO_URI=${MONGO_URI}
+# OPENAI_API_KEY=${OPENAI_API_KEY}
+# APP_URL=$${APP_URL}
+# EOF
+
+# sudo docker compose up --build -d
+# sudo docker compose up -d

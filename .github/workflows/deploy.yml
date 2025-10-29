@@ -104,12 +104,23 @@ jobs:
         echo "❌ EC2 did not become ready in time"
         exit 1
 
+    # ---------- Wait for Docker Setup to complete ----------
+    - name: Wait for Docker setup to complete
+      run: |
+        echo "⏳ Waiting for EC2 cloud-init to finish..."
+        for i in {1..20}; do
+          if ssh -o StrictHostKeyChecking=no -i ~/.ssh/devops-key ubuntu@${{ steps.get-ec2-ip.outputs.ec2_ip }} "cloud-init status --wait" 2>/dev/null; then
+            echo "✅ Docker Setup completed"
+            exit 0
+          fi
+          echo "Attempt $i: still waiting..."
+          sleep 15
+        done
+        echo "❌ Cloud-init did not finish in time"
+        exit 1
+
     # ---------- Deploy to EC2 ----------
     - name: Deploy app to EC2
-      env:
-        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        MONGO_URI: ${{ secrets.MONGO_URI }}
-        PORT: 3000
       run: |
         echo "Deploying to ${{ steps.get-ec2-ip.outputs.ec2_ip }}"
 
@@ -123,9 +134,10 @@ jobs:
         ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} << 'EOF'
           cd /opt/devops-blog/app
           cat <<EOV > .env
-          PORT=${PORT}
-          MONGO_URI=${MONGO_URI}
-          OPENAI_API_KEY=${OPENAI_API_KEY}
+          PORT=3000
+          MONGO_URI=${{ secrets.MONGO_URI }}
+          OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
         EOV
-          docker compose up -d --build
+          sudo docker compose up -d --build
+          sudo docker compose up -d
         EOF
