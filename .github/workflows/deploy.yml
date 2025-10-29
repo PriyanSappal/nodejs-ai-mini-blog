@@ -114,14 +114,14 @@ jobs:
         echo "Deploying to ${{ steps.get-ec2-ip.outputs.ec2_ip }}"
 
         # Ensure target directory exists
-        ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} "sudo mkdir -p ${APP_DIR} && sudo chown -R $USER:$USER ${APP_DIR}"
+        ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} "sudo mkdir -p ${APP_DIR} && sudo chown -R ${{ env.EC2_USER }}:${{ env.EC2_USER }} ${APP_DIR}"
 
         # Copy repo to EC2
         scp -i ~/.ssh/devops-key -o StrictHostKeyChecking=no -r . ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
 
         # SSH into EC2 and run Docker Compose
         ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} << 'EOF'
-          cd /opt/devops-blog
+          cd /opt/devops-blog/app
           cat <<EOV > .env
           PORT=${PORT}
           MONGO_URI=${MONGO_URI}
