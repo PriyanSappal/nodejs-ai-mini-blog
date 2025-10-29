@@ -46,49 +46,6 @@ cd /opt/devops-blog
 sudo git clone https://github.com/PriyanSappal/nodejs-ai-mini-blog.git .
 cd app/
 
-# # Copy the docker-compose file from Terraform
-# cat <<EOF > version: '3.9'
-
-# services:
-#   app:
-#     build: .
-#     ports:
-#       - "3000:3000"
-#     environment:
-#       - NODE_ENV=development
-#       - PORT=${PORT}
-#       - MONGO_URI=${MONGO_URI}
-#       - OPENAI_API_KEY=${OPENAI_API_KEY} # optional
-#       - APP_URL=$${APP_URL}
-#     depends_on:
-#       - mongo
-#     volumes:
-#       - .:/usr/src/app
-#       - /usr/src/app/node_modules
-#     networks:
-#       - app_net
-
-#   mongo:
-#     image: mongo:6
-#     container_name: mongo-db-new
-#     restart: always
-#     environment:
-#       MONGO_INITDB_DATABASE: devops_blog
-#     volumes:
-#       - mongo_data:/data/db
-#     networks:
-#       - app_net
-
-# volumes:
-#   mongo_data:
-
-# networks:
-#   app_net:
-#     driver: bridge
-# EOF
-
-# Run the stack
-
 sudo cat <<EOF > .env
 PORT=${PORT}
 MONGO_URI=${MONGO_URI}
@@ -97,3 +54,4 @@ APP_URL=$${APP_URL}
 EOF
 
 sudo docker compose up --build -d
+sudo docker compose up -d

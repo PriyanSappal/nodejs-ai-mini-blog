@@ -78,13 +78,13 @@ jobs:
         MONGO_URI: ${{ secrets.MONGO_URI }}
         PORT: 3000
       run: |
-        echo "Deploying to ${{ steps.get_ec2_ip.outputs.ec2_ip }}"
+        echo "Deploying to ${{ steps.get-ec2-ip.outputs.ec2_ip }}"
 
         # Copy repo to EC2
-        scp -o StrictHostKeyChecking=no -r . ${{ env.EC2_USER }}@${{ steps.get_ec2_ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
+        scp -o StrictHostKeyChecking=no -r . ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
 
         # SSH into EC2 and run Docker Compose
-        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get_ec2_ip.outputs.ec2_ip }} << 'EOF'
+        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} << 'EOF'
           cd $APP_DIR
           cat <<EOV > .env
           PORT=${PORT}
