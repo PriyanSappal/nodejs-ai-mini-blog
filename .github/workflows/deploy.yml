@@ -49,6 +49,20 @@ jobs:
 
     - name: Check Terraform version
       run: terraform version
+    
+    # ---------- Authenticate Terraform Cloud ----------
+    - name: Authenticate to Terraform Cloud
+      run: |
+        mkdir -p ~/.terraform.d
+        cat > ~/.terraform.d/credentials.tfrc.json <<EOF
+        {
+          "credentials": {
+            "app.terraform.io": {
+              "token": "${{ secrets.TF_API_TOKEN }}"
+            }
+          }
+        }
+        EOF
 
     # ---------- Terraform Init & Apply ----------
     - name: Terraform Init
