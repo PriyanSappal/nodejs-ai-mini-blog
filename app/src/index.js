@@ -13,7 +13,7 @@ const expressLayouts = require('express-ejs-layouts');
 
 const PORT = process.env.PORT || 3000;
 const MONGO_URI = process.env.MONGO_URI;
-const OPENAI_KEY = process.env.OPENAI_API_KEY || null; // optional
+const OPENAI__API_KEY = process.env.OPENAI_API_KEY || null; // optional
 const PUBLIC_IP = process.env.PUBLIC_IP
 
 
