@@ -70,6 +70,22 @@ jobs:
       run: |
         EC2_IP=$(terraform -chdir=./terraform/docker-compose-ec2 output -raw public_ip 2>/dev/null | grep -Eo '([0-9]{1,3}\.){3}[0-9]{1,3}' | head -n1)
         echo "ec2_ip=$EC2_IP" >> $GITHUB_OUTPUT
+        echo "✅ EC2 Public IP: $EC2_IP"
+
+    # ---------- Wait for EC2 to be Ready ----------
+    - name: Wait for EC2 SSH
+      run: |
+        echo "Waiting for EC2 instance to be ready..."
+        for i in {1..10}; do
+          if ssh -o StrictHostKeyChecking=no -i ~/.ssh/devops-key ubuntu@${{ steps.get-ec2-ip.outputs.ec2_ip }} "echo 'Instance is ready'" 2>/dev/null; then
+            echo "✅ EC2 is ready for SSH"
+            exit 0
+          fi
+          echo "Attempt $i: still waiting..."
+          sleep 10
+        done
+        echo "❌ EC2 did not become ready in time"
+        exit 1
 
     # ---------- Deploy to EC2 ----------
     - name: Deploy app to EC2
@@ -81,11 +97,11 @@ jobs:
         echo "Deploying to ${{ steps.get-ec2-ip.outputs.ec2_ip }}"
 
         # Copy repo to EC2
-        scp -o StrictHostKeyChecking=no -r . ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
+        scp -i ~/.ssh/devops-key -o StrictHostKeyChecking=no -r . ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
 
         # SSH into EC2 and run Docker Compose
-        ssh -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} << 'EOF'
-          cd $APP_DIR
+        ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} << 'EOF'
+          cd /opt/devops-blog
           cat <<EOV > .env
           PORT=${PORT}
           MONGO_URI=${MONGO_URI}

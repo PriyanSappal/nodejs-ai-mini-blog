@@ -2,6 +2,15 @@ provider "aws" {
   region = var.region
 }
 
+terraform {
+  cloud {
+    organization = "priyan-sappal-org"
+    workspaces {
+      name = "devops-miniblog-project"
+    }
+  }
+}
+
 resource "aws_key_pair" "devops_key" {
   key_name   = "devops-key"
   # public_key = file("~/.ssh/devops-key.pub")
