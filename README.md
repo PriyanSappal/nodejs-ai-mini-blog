@@ -253,7 +253,7 @@ flowchart TB
     subgraph AWS["AWS Cloud"]
         subgraph VPC["VPC (10.0.0.0/16)"]
             subgraph Public["Public Subnet (10.0.1.0/24)"]
-                EC2[EC2 Instance\n(Node.js + Docker)]
+                EC2[EC2 Instance<br/>(Node.js + Docker)]
                 IGW[Internet Gateway]
                 EC2 --> IGW
             end
@@ -263,19 +263,19 @@ flowchart TB
                 EC2 --> DB
             end
 
-            SG[Security Groups\n• Allow 22/80/443 to EC2\n• Allow 27017 only from EC2 to Mongo]
+            SG[Security Groups<br/>• Allow 22/80/443 to EC2<br/>• Allow 27017 only from EC2 to Mongo]
             SG --> EC2
             SG --> DB
         end
     end
 
     subgraph Client["User Browser"]
-        UI[Web UI\n(React/EJS)]
+        UI[Web UI<br/>(React/EJS)]
         UI -->|"HTTPS Requests"| EC2
     end
 
-    GH -->|"CI/CD Pipeline\n(SCP / SSH / Terraform Apply)"| EC2
-    TF -->|"Terraform Apply\nAWS Provider"| AWS
+    GH -->|"CI/CD Pipeline<br/>(SCP / SSH / Terraform Apply)"| EC2
+    TF -->|"Terraform Apply<br/>AWS Provider"| AWS
 
     EC2 -->|"AI Requests"| AI[OpenRouter API]
 ```
@@ -289,17 +289,17 @@ flowchart TB
   subgraph CI_CD["CI/CD Pipeline"]
     GH[GitHub Actions]
     GH -->|OIDC| AWS_IAM_OIDC[IAM OIDC Role]
-    GH --> ECR[ECR (Private Registry)]
+    GH --> ECR[ECR – Private Registry]
   end
 
-  subgraph AWS_VPC["AWS VPC (Private Network)"]
+  subgraph AWS_VPC["AWS VPC – Private Network"]
     direction TB
     ALB[ALB (Public) + ACM TLS]
-    AppASG[App Fleet (ECS/EKS/EC2) in Private Subnets]
+    AppASG[App Fleet – ECS/EKS/EC2 (Private Subnets)]
     Mongo[(MongoDB on EC2)]
     Secrets[Secrets Manager / SSM Parameter Store]
     CW[CloudWatch Logs → (Kinesis → S3)]
-    EBS[(EBS - Encrypted Volume)]
+    EBS[(EBS – Encrypted Volume)]
 
     ALB -->|HTTPS| AppASG
     AppASG -->|Connects via SG| Mongo
@@ -313,7 +313,7 @@ flowchart TB
   AWS_IAM_OIDC --> ECR
 
   CloudTrail[CloudTrail]
-  AuditS3[S3 (Encrypted) / Lake]
+  AuditS3[S3 – Encrypted / Lake]
   GuardDuty[GuardDuty]
   PagerDuty[PagerDuty / Slack Alerts]
   Insights[CloudWatch Alarms / Metrics]
