@@ -4,7 +4,7 @@ provider "aws" {
 
 terraform {
   cloud {
-    organization = "priyan-sappal-org"
+    organization = "devopsblog"
     workspaces {
       name = "devops-miniblog-project"
     }
