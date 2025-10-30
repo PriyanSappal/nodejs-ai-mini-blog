@@ -37,7 +37,7 @@ The project’s main goal is to **build and deploy a Node.js + MongoDB blog appl
 - Automated provisioning of infrastructure via **Terraform**
 - Containerization and orchestration via **Docker Compose**
 - Continuous Integration and Continuous Deployment (CI/CD) using **GitHub Actions**
-- Hosting on **AWS EC2**
+- Hosting on **AWS EC2** - using **AWS Free Tier**
 - Secure, environment-based configuration management
 - Optional **AI assistant integration** using the OpenRouter API
 
@@ -180,9 +180,9 @@ To improve state management and team collaboration, **Terraform Cloud** was used
 - Manage workspace variables (AWS keys, MongoDB URI, OpenAI API key)
 - Trigger automated Terraform runs from GitHub
 - Keep a detailed run history and audit log
-   - ![Log for Terraform destroy triggered by GitHub Actions](images/tf-destroy-github-actions.png): **Log for Terraform destroy triggered by GitHub Actions**
-
-![Terraform Cloud to store state files for now.](images/tf-cloud-state-file.png)
+   - **Log for Terraform destroy triggered by GitHub Actions**: ![Log for Terraform destroy triggered by GitHub Actions](images/tf-destroy-github-actions.png)
+- Variables from AWS to be used in Terraform Cloud.
+      ![Terraform Cloud to store state files for now.](images/tf-cloud-state-file.png)
 - In the future, want to store state file on an **S3 bucket** with state locking on **DynamoDB**.
 
 ---
@@ -240,11 +240,11 @@ F -->|Calls| H[OpenRouter AI API]
 H -->|Responds| F
 ```
 
-Improved:
+*Improved version used in a Secure Setting*:
 
 ```mermaid
 flowchart TB
-    subgraph GitHub["GitHub & CI/CD"]
+    subgraph GitHub["GitHub, CI/CD and IaC"]
         GH[GitHub Actions]
         TF[Terraform Cloud]
         GH --> TF
@@ -253,13 +253,15 @@ flowchart TB
     subgraph AWS["AWS Cloud"]
         subgraph VPC["VPC (10.0.0.0/16)"]
             subgraph Public["Public Subnet (10.0.1.0/24)"]
-                EC2[EC2 Instance<br/>(Node.js + Docker)]
+                EC2[EC2 Instance - Node.js + Docker]
                 IGW[Internet Gateway]
+                CloudWatch[Cloud Watch]
                 EC2 --> IGW
+                EC2 --> |"Logs and Metrics"| CloudWatch
             end
 
-            subgraph Private["Private Subnet (10.0.2.0/24)"]
-                DB[(MongoDB Database)]
+            subgraph Private["PrivateSubnet(10.0.2.0/24)"]
+                DB[(MongoDB Database - Visits + Posts)]
                 EC2 --> DB
             end
 
@@ -270,7 +272,7 @@ flowchart TB
     end
 
     subgraph Client["User Browser"]
-        UI[Web UI<br/>(React/EJS)]
+        UI[Web UI - React/EJS]
         UI -->|"HTTPS Requests"| EC2
     end
 
@@ -280,6 +282,17 @@ flowchart TB
     EC2 -->|"AI Requests"| AI[OpenRouter API]
 ```
 
+| Area                | Benefit                                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------------------------ |
+| **Automation**      | GitHub Actions + Terraform automate builds, tests, provisioning, and deployments with no manual steps. |
+| **Consistency**     | IaC ensures infrastructure can be replicated exactly between environments (dev, staging, prod).        |
+| **Security**        | Private subnets and strict security groups protect internal services (e.g., MongoDB).                  |
+| **Scalability**     | Infrastructure can easily expand to ECS, ALB, or multi-AZ setups without manual reconfiguration.       |
+| **Observability**   | Logs and metrics can be integrated with AWS CloudWatch or Terraform outputs for full visibility.       |
+| **Cost Efficiency** | Resources are defined declaratively, so unused environments can be torn down automatically.            |
+| **AI Integration**  | Adds intelligence (via OpenRouter) directly into your Node.js backend, enhancing functionality.        |
+
+
 ---
 
 ## Future Considerations
@@ -288,40 +301,51 @@ flowchart TB
 flowchart TB
   subgraph CI_CD["CI/CD Pipeline"]
     GH[GitHub Actions]
-    GH -->|OIDC| AWS_IAM_OIDC[IAM OIDC Role]
+    TF[Terraform Cloud / CLI]
+    GH -->|OIDC Auth| AWS_IAM_OIDC[IAM OIDC Role]
+    GH --> TF
     GH --> ECR[ECR – Private Registry]
   end
 
-  subgraph AWS_VPC["AWS VPC – Private Network"]
-    direction TB
-    ALB[ALB (Public) + ACM TLS]
-    AppASG[App Fleet – ECS/EKS/EC2 (Private Subnets)]
-    Mongo[(MongoDB on EC2)]
-    Secrets[Secrets Manager / SSM Parameter Store]
-    CW[CloudWatch Logs → (Kinesis → S3)]
-    EBS[(EBS – Encrypted Volume)]
+  subgraph AWS["AWS Infrastructure"]
+    subgraph AWS_VPC["AWS VPC – Private Network"]
+      direction TB
+      ALB[ALB - Public + ACM TLS]
+      AppASG[App Fleet – ECS/EKS/EC2 - Private Subnets]
+      Mongo[(MongoDB on EC2)]
+      Secrets[Secrets Manager / SSM Parameter Store]
+      CW[CloudWatch Logs → Kinesis → S3]
+      EBS[(EBS – Encrypted Volume)]
 
-    ALB -->|HTTPS| AppASG
-    AppASG -->|Connects via SG| Mongo
-    AppASG -->|Reads secrets| Secrets
-    AppASG -->|Logs| CW
-    Mongo -->|EBS Encrypted| EBS
+      ALB -->|HTTPS| AppASG
+      AppASG -->|Connects via SG| Mongo
+      AppASG -->|Reads secrets| Secrets
+      AppASG -->|Logs| CW
+      Mongo -->|EBS Encrypted| EBS
+    end
+
+    CloudTrail[CloudTrail]
+    AuditS3[S3 – Encrypted / Lake]
+    GuardDuty[GuardDuty]
+    PagerDuty[PagerDuty / Slack Alerts]
+    Insights[CloudWatch Alarms / Metrics]
+
+    CloudTrail -.->|Management API Logs| AuditS3
+    CloudTrail --> GuardDuty
+    GuardDuty -->|Alerts| PagerDuty
+    CW --> Insights
   end
 
   Internet[(Internet)] --> ALB
   ECR --> AppASG
   AWS_IAM_OIDC --> ECR
 
-  CloudTrail[CloudTrail]
-  AuditS3[S3 – Encrypted / Lake]
-  GuardDuty[GuardDuty]
-  PagerDuty[PagerDuty / Slack Alerts]
-  Insights[CloudWatch Alarms / Metrics]
+  %% Terraform provisioning flows
+  TF -->|"terraform apply<br/>provisions infrastructure"| AWS_VPC
+  TF -->|"creates EC2, ECS, ECR, IAM, SGs"| AppASG
+  TF -->|"manages state in Terraform Cloud / S3"| AWS
+  GH -->|"Triggers Terraform plan/apply"| TF
 
-  CloudTrail -.->|Management API Logs| AuditS3
-  CloudTrail --> GuardDuty
-  GuardDuty -->|Alerts| PagerDuty
-  CW --> Insights
 ```
 
 ### Network & Perimeter

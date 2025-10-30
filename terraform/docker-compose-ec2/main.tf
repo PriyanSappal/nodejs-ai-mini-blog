@@ -2,6 +2,7 @@ provider "aws" {
   region = var.region
 }
 
+# uncomment if using ci/cd pipeline, comment if local deployment
 terraform {
   cloud {
     organization = "devopsblog"
