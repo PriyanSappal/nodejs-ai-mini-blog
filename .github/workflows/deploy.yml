@@ -128,7 +128,10 @@ jobs:
         ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} "sudo mkdir -p ${APP_DIR} && sudo chown -R ${{ env.EC2_USER }}:${{ env.EC2_USER }} ${APP_DIR}"
 
         # Copy repo to EC2
-        scp -i ~/.ssh/devops-key -o StrictHostKeyChecking=no -r . ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
+        rsync -avz -e "ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no" \
+        --exclude '.git' \
+        --exclude '.github' \
+        ./ ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }}:${{ env.APP_DIR }}
 
         # SSH into EC2 and run Docker Compose
         ssh -i ~/.ssh/devops-key -o StrictHostKeyChecking=no ${{ env.EC2_USER }}@${{ steps.get-ec2-ip.outputs.ec2_ip }} << 'EOF'
@@ -138,6 +141,8 @@ jobs:
           MONGO_URI=${{ secrets.MONGO_URI }}
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
         EOV
+          sudo docker compose down || true
           sudo docker compose up -d --build
           sudo docker compose up -d
+          echo "✅ App deployed successfully!"
         EOF
