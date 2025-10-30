@@ -165,6 +165,9 @@ This setup ensures:
 4. For testing purposes (just in "development") - included a `terraform destroy` within a `destroy.yml` pipeline
    - ![Destroy pipeline](images/tf-destroy-github-actions.png).
 
+**Front Page with CI/CD pipeline**
+![Front-page](images/frontpage-ci-cd.png)
+
 **Benefits:**
 - Fully automated deployment pipeline
 - No manual AWS console interaction

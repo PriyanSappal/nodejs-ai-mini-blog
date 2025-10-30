@@ -141,7 +141,7 @@ jobs:
           MONGO_URI=${{ secrets.MONGO_URI }}
           OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
         EOV
-          sudo docker compose down || true
+          sudo docker compose up -d --build
           sudo docker compose up -d
           echo "✅ App deployed successfully!"
         EOF
