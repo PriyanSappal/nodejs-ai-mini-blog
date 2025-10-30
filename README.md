@@ -163,10 +163,18 @@ This setup ensures:
 2. Terraform then provisions or updates the AWS infrastructure automatically
 3. Docker and the application start on the new or existing EC2 instance
 4. For testing purposes (just in "development") - included a `terraform destroy` within a `destroy.yml` pipeline
-   - ![Destroy pipeline](images/tf-destroy-github-actions.png).
+   - ![Destroy pipeline](images/tf-destroy-github-actions.png)
 
-**Front Page with CI/CD pipeline**
+**2 minute pipeline after push to `main` branch**
+![alt text](images/github-actions-test.png)
+
+**Results: Front Page with CI/CD pipeline**
 ![Front-page](images/frontpage-ci-cd.png)
+
+![alt text](images/2nd-test-ci-cd.png)
+
+**Manual Clean-Up pipeline for development**
+![alt text](images/githubactions-destroy.png)
 
 **Benefits:**
 - Fully automated deployment pipeline
