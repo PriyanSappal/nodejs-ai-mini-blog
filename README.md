@@ -1,6 +1,6 @@
-# 🧩 DevOps Mini Blog Project — Full Stack Deployment with CI/CD, Docker, AWS & Terraform
+# 🧩 DevOps Mini Blog Project — Full Stack Deployment with CI/CD, Docker, AWS & Terraform and Local Kubernetes Deployment.
 
-- [🧩 DevOps Mini Blog Project — Full Stack Deployment with CI/CD, Docker, AWS \& Terraform](#-devops-mini-blog-project--full-stack-deployment-with-cicd-docker-aws--terraform)
+- [🧩 DevOps Mini Blog Project — Full Stack Deployment with CI/CD, Docker, AWS \& Terraform and Local Kubernetes Deployment.](#-devops-mini-blog-project--full-stack-deployment-with-cicd-docker-aws--terraform-and-local-kubernetes-deployment)
   - [🏗️ Project Overview](#️-project-overview)
   - [⚙️ Application Stack](#️-application-stack)
   - [🏃 Quick local run (dev)](#-quick-local-run-dev)
@@ -158,6 +158,10 @@ This setup ensures:
 **Code**
 - [CI/CD pipeline](.github/workflows/deploy.yml)
 - [Destroy Infra Pipeline](.github/workflows/destroy.yml): this is for test/dev environments.
+
+**Video Demo**
+
+![ci-cd pipeline](images/nodejs-ci-cd-pipeline.mp4)
 
 **GitHub Actions** is configured to handle the **continuous integration and deployment (CI/CD)** process.
 
