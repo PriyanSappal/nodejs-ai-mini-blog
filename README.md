@@ -161,7 +161,8 @@ This setup ensures:
 
 **Video Demo**
 
-![ci-cd pipeline](images/nodejs-ci-cd-pipeline.mp4)
+[![Watch the demo video](images/thumbnail.png)](https://github.com/PriyanSappal/nodejs-ai-mini-blog/releases/download/v1.0.0/nodejs-ci-cd-pipeline.mp4)
+
 
 **GitHub Actions** is configured to handle the **continuous integration and deployment (CI/CD)** process.
 
