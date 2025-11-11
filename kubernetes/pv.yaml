@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongo-pv
+spec:
+  capacity:
+    storage: 1Gi # Set the storage amount; adjust as necessary, avoid using excessive storage
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete # Automatically delete PV when PVC is deleted
+  hostPath:
+    path: "/data/db" # For demonstration; use this path for testing, but in production use a cloud storage solution

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: devops-blog-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: devops-blog
+  template:
+    metadata:
+      labels:
+        app: devops-blog
+    spec:
+      containers:
+      - name: devops-blog
+        image: priyansappal1/devops-blog:latest
+        ports:
+        - containerPort: 3000
+        env:
+        - name: MONGO_URI
+          value: mongodb://mongo:27017/devops-blog
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: openai-secret
+              key: OPENAI_API_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: devops-blog-svc
+spec:
+  type: NodePort
+  selector:
+    app: devops-blog
+  ports:
+  - port: 3000
+    targetPort: 3000

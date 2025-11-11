@@ -3,20 +3,19 @@
 - [🧩 DevOps Mini Blog Project — Full Stack Deployment with CI/CD, Docker, AWS \& Terraform](#-devops-mini-blog-project--full-stack-deployment-with-cicd-docker-aws--terraform)
   - [🏗️ Project Overview](#️-project-overview)
   - [⚙️ Application Stack](#️-application-stack)
-  - [Quick local run (dev)](#quick-local-run-dev)
+  - [🏃 Quick local run (dev)](#-quick-local-run-dev)
   - [☁️ Infrastructure and Deployment](#️-infrastructure-and-deployment)
     - [🧩 1. Infrastructure as Code with Terraform](#-1-infrastructure-as-code-with-terraform)
-  - [](#)
     - [🌐 2. AWS EC2 Deployment](#-2-aws-ec2-deployment)
-  - [**Considerations**](#considerations)
     - [🐳 3. Docker Containerization](#-3-docker-containerization)
     - [🔄 4. CI/CD Pipeline — GitHub Actions](#-4-cicd-pipeline--github-actions)
     - [☁️ 5. Terraform Cloud Integration](#️-5-terraform-cloud-integration)
+    - [☸️ 6. Kubernetes Deployment](#️-6-kubernetes-deployment)
   - [🧠 AI Integration (OpenRouter / OpenAI API)](#-ai-integration-openrouter--openai-api)
   - [🔐 Environment Variables](#-environment-variables)
   - [📊 Logging and Security](#-logging-and-security)
   - [🧱 Architecture Diagram](#-architecture-diagram)
-  - [Future Considerations](#future-considerations)
+  - [🔮 Future Considerations](#-future-considerations)
     - [Network \& Perimeter](#network--perimeter)
     - [Identity \& Access Management (IAM)](#identity--access-management-iam)
     - [Secrets \& Configuration](#secrets--configuration)
@@ -60,7 +59,7 @@ The application allows users to:
 - Interact with an AI assistant that generates text responses
 
 ---
-## Quick local run (dev)
+## 🏃 Quick local run (dev)
 1. `cd app`
 2. Create a `.env` and create an API Key with `https://openrouter.ai/` and populate it.
 3. Run `docker compose up --build`
@@ -79,6 +78,10 @@ The application allows users to:
 ## ☁️ Infrastructure and Deployment
 
 ### 🧩 1. Infrastructure as Code with Terraform
+**Code**
+- [main.tf](terraform/docker-compose-ec2/main.tf) - this defines the code for provisioning and starting up the EC2 instance. 
+- [variables.tf](terraform/docker-compose-ec2/variables.tf) - the variables that are referenced in [main.tf](terraform/docker-compose-ec2/main.tf).
+- I also have other files that I have not commited that contain secrets such as `terraform.tfvars` and `.credential` files as these contain sensitive information.
 
 Terraform was used to **automate the provisioning** of the required AWS resources.
 
@@ -105,6 +108,7 @@ Terraform was used to **automate the provisioning** of the required AWS resource
 ```
 
 ![Terraform Apply](images/terraform-apply.png)
+
 ---
 
 ### 🌐 2. AWS EC2 Deployment
@@ -128,12 +132,12 @@ This means **no manual SSH setup** is needed — everything is automated through
 - Posts Page (**MongoDB**)
 ![Posts Page](images/posts-page-ec2.png)
 
-**Considerations**
-- 
-
 ---
 
 ### 🐳 3. Docker Containerization
+**Code**
+- [Dockerfile](app/Dockerfile)
+- [Docker-Compose.yml](app/docker-compose.yml)
 
 Both the **Node.js application** and **MongoDB** run in containers.
 
@@ -151,6 +155,9 @@ This setup ensures:
 ---
 
 ### 🔄 4. CI/CD Pipeline — GitHub Actions
+**Code**
+- [CI/CD pipeline](.github/workflows/deploy.yml)
+- [Destroy Infra Pipeline](.github/workflows/destroy.yml): this is for test/dev environments.
 
 **GitHub Actions** is configured to handle the **continuous integration and deployment (CI/CD)** process.
 
@@ -160,9 +167,9 @@ This setup ensures:
    - Configures AWS credentials from GitHub Secrets
    - Initializes and applies the Terraform configuration
 ![ci-cd pipeline](images/ci-cd-pipeline.png)
-2. Terraform then provisions or updates the AWS infrastructure automatically
-3. Docker and the application start on the new or existing EC2 instance
-4. For testing purposes (just in "development") - included a `terraform destroy` within a `destroy.yml` pipeline
+1. Terraform then provisions or updates the AWS infrastructure automatically
+2. Docker and the application start on the new or existing EC2 instance
+3. For testing purposes (just in "development") - included a `terraform destroy` within a `destroy.yml` pipeline
    - ![Destroy pipeline](images/tf-destroy-github-actions.png)
 
 **2 minute pipeline after push to `main` branch**
@@ -197,6 +204,38 @@ To improve state management and team collaboration, **Terraform Cloud** was used
 - In the future, want to store state file on an **S3 bucket** with state locking on **DynamoDB**.
 
 ---
+
+### ☸️ 6. Kubernetes Deployment
+**YAML manifests**
+- [NodeJS](kubernetes/app-deployment.yaml)
+- [Mongo](kubernetes/mongo-deployment.yaml)
+- [MetalLB](kubernetes/metal-lb-config.yaml)
+- [Persistent Volume](kubernetes/pv.yaml)
+- [Persistent Volume Claim](kubernetes/pvc.yaml)
+- [HPA (Horizontal Pod Autoscaler)](kubernetes/hpa.yaml)
+
+The local Kubernetes deployment demonstrates container orchestration and environment management using Kubernetes resources such as:
+- Deployments for the Node.js app and MongoDB
+- Services for internal/external networking
+- Secrets for API keys and credentials: `kubectl create secret generic openai-secret --from-env-file=.env`
+- Persistent Volumes (optional) for MongoDB data
+- ConfigMaps / Environment variables for configuration
+  
+1. ![front-page](images/kubernetes-app-deployment.png)
+2. ![kubectl get all](images/kubectl-get-all.png)
+
+**Diagram**
+```mermaid
+graph TD
+    A[Docker Desktop Kubernetes Cluster] -->|Deploys| B[Node.js App Pod]
+    A -->|Deploys| C[MongoDB Pod]
+    B -->|Connects to| C
+    B --> D[Service: devops-blog-svc - LoadBalancer]
+    C --> E[Service: mongo - NodePort]
+    D --> F[Local Browser Access via Port Forward / LoadBalancer]
+    G[Secret: openai-secret] --> B
+    H[ConfigMap / Env Vars] --> B
+```
 
 ## 🧠 AI Integration (OpenRouter / OpenAI API)
 
@@ -306,7 +345,7 @@ flowchart TB
 
 ---
 
-## Future Considerations
+## 🔮 Future Considerations
 
 ```mermaid
 flowchart TB
